@@ -1,4 +1,4 @@
 sampleMSE
 =========
 
-sample code from Streaming Media West presentatipon
+sample code from Streaming Media West presentation
