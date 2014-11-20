@@ -9,6 +9,7 @@
     var ms = new MediaSource();
     var sourceBuffer;
     var segNum=0;
+    var maxSegNum = 65;
     
     function startup(){
         // add event listeners
@@ -46,7 +47,7 @@
     
     function loadSegment(){
         // this video has only 65 segments, so stop after 65
-        if(segNum < 65){
+        if(segNum < maxSegNum){
             getSegment(segNum);
             segNum++;
         } 
