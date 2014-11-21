@@ -4,12 +4,18 @@
     // set mimetype and codec
     var mimeType = "video/mp4";
     var codecs = "avc1.4D401F";
+    var audioMimeType = "audio/mp4";
+    var audioCodecs = "mp4a.40.2";
+    
     
     // create media source instance
     var ms = new MediaSource();
-    var sourceBuffer;
+    var vSourceBuffer;
+    var aSourceBuffer;
     var segNum=0;
     var maxSegNum = 65;
+    var audSegNum=0;
+    var maxAudSegNum = 65;
     
     function startup(){
         // add event listeners
@@ -29,38 +35,57 @@
     function opened(){
         // create source buffer
         var value = mimeType+';codecs="'+codecs+'"';
-        sourceBuffer = ms.addSourceBuffer(value);
-        
-        // request initialization segment
+        var aValue = audioMimeType+';codecs="'+audioCodecs+'"';
+        vSourceBuffer = ms.addSourceBuffer(value);
+        aSourceBuffer = ms.addSourceBuffer(aValue);
+        // request video initialization segment
         var req = new XMLHttpRequest();
         req.responseType = "arraybuffer";
         req.open("GET","http://localhost/racecarbackup/video2/Header.m4s",true);
         req.onload = function(){
             var resp = req.response;
             var array = new Uint8Array(resp);
-            sourceBuffer.appendBuffer(array);
+            vSourceBuffer.appendBuffer(array);
             // wait until sourceBuffer is primed with initialization segment before loading content
-            sourceBuffer.addEventListener("updateend",loadSegment);
+            vSourceBuffer.addEventListener("updateend",loadVideoSegment);
         }
         req.send();
+        
+       // var audreq = new XMLHttpRequest();
+    //    audreq.responseType = "arraybuffer";
+    //    audreq.open("GET","http://localhost/racecarbackup/audio/Header.m4s",true);
+    //    audreq.onload = function(){
+    //        var resp = req.response;
+    //        var array = new Uint8Array(resp);
+    //        aSourceBuffer.appendBuffer(array);
+            // wait until sourceBuffer is primed with initialization segment before loading content
+    //        aSourceBuffer.addEventListener("updateend",loadAudioSegment);
+    //    }
+    //    audreq.send();
     }
     
-    function loadSegment(){
+    function loadVideoSegment(){
         // this video has only 65 segments, so stop after 65
         if(segNum < maxSegNum){
-            getSegment(segNum);
+            getSegment("http://localhost/racecarbackup/video2/"+segNum+".m4s");
             segNum++;
         } 
     }
-    
-    function getSegment(segNum){
+    function loadAudioSegment(){
+        // this video has only 65 segments, so stop after 65
+        if(audSegNum < maxAudSegNum){
+           getSegment("http://localhost/racecarbackup/audio/"+segNum+".m4s");
+            audSegNum++;
+        } 
+    }
+    function getSegment(url){
         var req = new XMLHttpRequest();
         req.responseType = "arraybuffer";
-        req.open("GET","http://localhost/racecarbackup/video2/"+segNum+".m4s",true);
+        req.open("GET",url,true);
         req.onload = function(){
             var resp = req.response;
             var array = new Uint8Array(resp);
-            sourceBuffer.appendBuffer(resp);
+            aSourceBuffer.appendBuffer(resp);
         }
         req.send();
     }
